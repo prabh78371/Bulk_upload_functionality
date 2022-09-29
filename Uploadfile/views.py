@@ -8,11 +8,19 @@ from rest_framework.response import Response
 from tablib import Dataset
 import csv
 from django.core.files.storage import FileSystemStorage
+from .serilizers import Productserilizer
 # Create your views here.
 
 
-@api_view(['POST'])
+@api_view(['GET','POST'])
 def upload_data(request):
+
+    if request.method=='GET':
+        prod = Product.objects.all()
+        serilizer = Productserilizer(prod,many=True)
+        return Response(serilizer.data)
+
+
     if request.method == 'POST':
         dataset = Dataset()
         myfile = request.FILES['myfile']
@@ -20,9 +28,13 @@ def upload_data(request):
         import_data = dataset.load(myfile.read(),format='xlsx')
         # load data into django model
         for data in import_data:
-            value= Product(data[0],data[1],data[2],data[3],data[4],data[5])
+            print(data)
+            value= Product(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7])
             value.save()
         return Response("success")
+
+
+
 
 
 
