@@ -22,13 +22,13 @@ def upload_data(request):
             uploaded_file = pd.read_excel(excelfile)
             dbframe = uploaded_file
             header = list(dbframe.columns)
-            if header == ['id', 'Name', 'price', 'image', 'img', 'gst','amount', 'brand']:   
+            if header == ['id', 'Name', 'price', 'image', 'gst','amount', 'brand']:   
                         for dbframe in dbframe.itertuples():
                                
                                 for image in images:
                                     if str(image)==str(dbframe.image):
                                        upload_img = image
-                                obj = Product.objects.create(name=dbframe.Name,price = dbframe.price,image = upload_img,img=dbframe.img,gst=dbframe.gst,amount=dbframe.amount,brand = dbframe.brand)
+                                obj = Product.objects.create(name=dbframe.Name,price = dbframe.price,image = upload_img,gst=dbframe.gst,amount=dbframe.amount,brand = dbframe.brand)
                                 obj.save()  
             else:
                 return Response("file doesn't have required fields")
