@@ -1,14 +1,8 @@
-from dataclasses import dataclass
-from django.shortcuts import render
-import xlwt
-from django.http import HttpResponse
 from .models import Product
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from tablib import Dataset
-import csv
-from django.core.files.storage import FileSystemStorage
 from .serilizers import Productserilizer
+import pandas as pd
 # Create your views here.
 
 
@@ -20,58 +14,16 @@ def upload_data(request):
         serilizer = Productserilizer(prod,many=True)
         return Response(serilizer.data)
 
-
-    if request.method == 'POST':
-        dataset = Dataset()
-        myfile = request.FILES['myfile']
-        # load excel file data
-        import_data = dataset.load(myfile.read(),format='xlsx')
-        # load data into django model
-        for data in import_data:
-            print(data)
-            value= Product(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7])
-            value.save()
-        return Response("success")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        # import_data = Dataset.load(file_data.read(),format='xlsx')
-        # for data in import_data:
-        #     print(data)
-        #     value= Product(data[0],data[1],data[2],data[3],data[4])
-        #     value.save()
-
-        # return("sucess")
-
+    if request.method == 'POST' :          
+            myfile = request.FILES['myfile']     
+            uploaded_file = pd.read_excel(myfile)
+            dbframe = uploaded_file
+            header = list(dbframe.columns)
+            if header == ['id', 'Name', 'price', 'image', 'imgs', 'gst','amount', 'brand']:   
+                        for dbframe in dbframe.itertuples():
+                            obj = Product.objects.create(name=dbframe.Name,price = dbframe.price,image = dbframe.image,img = dbframe.imgs,gst=dbframe.gst,amount=dbframe.amount,brand = dbframe.brand)
+                            print(type(obj))
+                            obj.save()
+            else:
+                    return Response("file doesn't have required fields")
+            return Response("created Product Data")            
